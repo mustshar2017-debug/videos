@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WAV | عالم الفيديو</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #10111b;
+      color: white;
+    }
+    header {
+      background: #191b2b;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #33364d;
+    }
+    .logo { font-size: 30px; font-weight: bold; color: #55e6c1; }
+    header span { color: #bbb; font-size: 13px; }
+    main { max-width: 600px; margin: 30px auto; padding: 16px; }
+    .welcome, .upload, .video-box {
+      background: #1b1d2d;
+      border: 1px solid #33364d;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 25px; margin-top: 0; }
+    p { color: #c1c4d6; line-height: 1.8; }
+    input, textarea {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border: 1px solid #454963;
+      border-radius: 10px;
+      background: #10111b;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: #55e6c1;
+      color: #10111b;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    video { width: 100%; border-radius: 12px; margin-top: 12px; }
+    .note { font-size: 13px; color: #aeb3c8; }
+    footer { text-align: center; padding: 25px; color: #999; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">WAV</div>
+    <span>عالمك، فيديوهاتك</span>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <h1>أهلاً بيك في WAV 🎬</h1>
+      <p>منصتك لمشاهدة الفيديوهات ومشاركة لحظاتك مع العالم.</p>
+    </section>
+
+    <section class="upload">
+      <h2>انشر فيديوك</h2>
+      <p>اختار فيديو من تلفونك واكتب وصفاً له.</p>
+      <input id="videoFile" type="file" accept="video/*">
+      <textarea id="description" rows="3"
+        placeholder="اكتب وصف الفيديو هنا..."></textarea>
+      <button onclick="previewVideo()">معاينة الفيديو</button>
+      <p class="note" id="message">
+        هذه معاينة محلية فقط، ولم يُرفع الفيديو إلى الإنترنت بعد.
+      </p>
+      <div id="preview"></div>
+    </section>
+
+    <section class="video-box">
+      <h2>اكتشف WAV</h2>
+      <p>قريباً: مشاركة الفيديوهات ومشاهدتها والتفاعل معها.</p>
+    </section>
+  </main>
+
+  <footer>WAV © 2026 — منصة الفيديو الخاصة بك</footer>
+
+  <script>
+    function previewVideo() {
+      const file = document.getElementById('videoFile').files[0];
+      const preview = document.getElementById('preview');
+      const message = document.getElementById('message');
+
+      if (!file) {
+        message.textContent = 'اختار ملف فيديو أولاً.';
+        return;
+      }
+
+      if (!file.type.startsWith('video/')) {
+        message.textContent = 'الملف المختار ليس فيديو.';
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = '';
+
+      const video = document.createElement('video');
+      video.controls = true;
+      video.src = url;
+      preview.appendChild(video);
+
+      const description = document.createElement('p');
+      description.textContent =
+        document.getElementById('description').value;
+      preview.appendChild(description);
+
+      message.textContent =
+        'نجحت المعاينة على جهازك. لم يُنشر الفيديو على الإنترنت بعد.';
+    }
+  </script>
+</body>
+</html>
