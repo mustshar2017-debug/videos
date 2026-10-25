@@ -125,5 +125,97 @@
         'نجحت المعاينة على جهازك. لم يُنشر الفيديو على الإنترنت بعد.';
     }
   </script>
+  
+<!-- WAV: ربط رفع الفيديوهات مع Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function () {
+  const PROJECT_URL = "https://rkqpvdwbdcpusffqlrbm.supabase.co/rest/v1/";
+  const PUBLISHABLE_KEY = "sb_publishable_gKzepHVWo9kZUzQ_bf-1Fw_Gf69uFf7";
+
+  if (
+    PROJECT_URL.includes("ضع_") ||
+    PUBLISHABLE_KEY.includes("ضع_")
+  ) {
+    console.error("أضف رابط مشروع Supabase ومفتاح النشر أولاً.");
+    return;
+  }
+
+  const client = window.supabase.createClient(
+    PROJECT_URL,
+    PUBLISHABLE_KEY
+  );
+
+  const fileInput = document.querySelector(
+    'input[type="file"][accept*="video"]'
+  );
+
+  if (!fileInput) {
+    console.error("لم يتم العثور على حقل اختيار الفيديو.");
+    return;
+  }
+
+  let status = document.getElementById("wav-upload-status");
+
+  if (!status) {
+    status = document.createElement("p");
+    status.id = "wav-upload-status";
+    status.setAttribute("role", "status");
+    fileInput.insertAdjacentElement("afterend", status);
+  }
+
+  let uploadButton = document.getElementById("wav-upload-button");
+
+  if (!uploadButton) {
+    uploadButton = document.createElement("button");
+    uploadButton.id = "wav-upload-button";
+    uploadButton.type = "button";
+    uploadButton.textContent = "رفع الفيديو";
+    status.insertAdjacentElement("afterend", uploadButton);
+  }
+
+  uploadButton.addEventListener("click", async function () {
+    const file = fileInput.files && fileInput.files[0];
+
+    if (!file) {
+      status.textContent = "اختار فيديو من تلفونك أولاً.";
+      return;
+    }
+
+    if (!file.type.startsWith("video/")) {
+      status.textContent = "الرجاء اختيار ملف فيديو.";
+      return;
+    }
+
+    uploadButton.disabled = true;
+    status.textContent = "جارٍ رفع الفيديو، انتظر قليلاً...";
+
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = Date.now() + "-" +
+        crypto.randomUUID() + "-" + safeName;
+
+      const { data, error } = await client.storage
+        .from("videos")
+        .upload(path, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      status.textContent =
+        "تم رفع الفيديو بنجاح. اسم الملف: " + data.path;
+    } catch (error) {
+      console.error(error);
+      status.textContent =
+        "تعذر رفع الفيديو. تحقق من صلاحيات التخزين والاتصال بالإنترنت.";
+    } finally {
+      uploadButton.disabled = false;
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
