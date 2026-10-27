@@ -217,6 +217,7 @@
 })();
 </script>
 
+
 <section id="wav-gallery">
   <h2>🎬 الفيديوهات المنشورة على WAV</h2>
   <div id="wav-videos">جاري تحميل الفيديوهات...</div>
@@ -226,40 +227,57 @@
 async function loadWavVideos() {
   const box = document.getElementById("wav-videos");
 
+  const PROJECT_URL =
+    "https://rkqpvdwbdcpusffqlrbm.supabase.co";
+
+  // مفتاح Supabase العام المستخدم في كود الموقع الأصلي
+  const API_KEY = PUBLISHABLE_KEY;
+
   try {
     const response = await fetch(
       PROJECT_URL + "/storage/v1/object/list/videos",
       {
         method: "POST",
         headers: {
-          "apikey": PUBLISHABLE_KEY,
-          "Authorization": "Bearer " + PUBLISHABLE_KEY,
+          "apikey": API_KEY,
+          "Authorization": "Bearer " + API_KEY,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           limit: 100,
           offset: 0,
-          sortBy: { column: "created_at", order: "desc" }
+          sortBy: {
+            column: "created_at",
+            order: "desc"
+          }
         })
       }
     );
 
-    if (!response.ok) throw new Error("تعذر جلب الفيديوهات");
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(
+        "خطأ من التخزين (" +
+        response.status + "): " + details
+      );
+    }
 
     const files = await response.json();
     box.innerHTML = "";
 
     const videos = files.filter(file =>
-      file.name && /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name)
+      file.name &&
+      /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name)
     );
 
-    if (!videos.length) {
+    if (videos.length === 0) {
       box.textContent = "لا توجد فيديوهات منشورة حالياً.";
       return;
     }
 
     videos.forEach(file => {
-      const url = PROJECT_URL +
+      const url =
+        PROJECT_URL +
         "/storage/v1/object/public/videos/" +
         encodeURIComponent(file.name);
 
@@ -267,21 +285,27 @@ async function loadWavVideos() {
       video.src = url;
       video.controls = true;
       video.playsInline = true;
+      video.preload = "metadata";
       video.style.width = "100%";
       video.style.maxWidth = "600px";
+      video.style.display = "block";
 
       const item = document.createElement("div");
       item.style.margin = "20px 0";
       item.appendChild(video);
       box.appendChild(item);
     });
+
   } catch (error) {
-    box.textContent = "تعذر تحميل الفيديوهات. تأكد من صلاحيات القراءة.";
+    console.error("WAV Gallery Error:", error);
+    box.textContent =
+      "تعذر تحميل الفيديوهات. التفاصيل: " + error.message;
   }
 }
 
 loadWavVideos();
 </script>
+
 
 </body>
 </html>
